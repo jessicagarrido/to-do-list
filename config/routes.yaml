@@ -3,3 +3,8 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+index:
+    path: /
+    controller: App\Controller\DefaultController::homepage
+    methods: GET 
