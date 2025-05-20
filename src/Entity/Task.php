@@ -23,13 +23,17 @@ class Task
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private ?bool $isDone = null;
+    #[ORM\Column(type: 'boolean')]
+    private bool $isDone = false;
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+    }
 
     public function getId(): ?int
     {
@@ -44,7 +48,6 @@ class Task
     public function setTitle(string $title): static
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -56,7 +59,6 @@ class Task
     public function setContent(string $content): static
     {
         $this->content = $content;
-
         return $this;
     }
 
@@ -68,11 +70,10 @@ class Task
     public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
-    public function isDone(): ?bool
+    public function isDone(): bool
     {
         return $this->isDone;
     }
@@ -80,7 +81,12 @@ class Task
     public function setIsDone(bool $isDone): static
     {
         $this->isDone = $isDone;
+        return $this;
+    }
 
+    public function toggle(bool $flag): static
+    {
+        $this->isDone = $flag;
         return $this;
     }
 
@@ -92,7 +98,6 @@ class Task
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
     }
 }
