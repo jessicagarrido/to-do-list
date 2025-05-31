@@ -5,7 +5,7 @@ namespace App\Form;
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType; // <-- corrigé ici
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -35,8 +35,8 @@ class UserType extends AbstractType
                     'attr' => ['autocomplete' => 'new-password'],
                 ],
             ])
-            ->add('email', EmailType::class, [
-                'label' => 'Adresse email',
+            ->add('mail', EmailType::class, [  // <-- ici aussi
+                'label' => 'Adresse mail',
                 'required' => true,
                 'attr' => ['autocomplete' => 'email'],
             ])
@@ -46,7 +46,7 @@ class UserType extends AbstractType
                     'Administrateur' => 'ROLE_ADMIN',
                     'Utilisateur' => 'ROLE_USER',
                 ],
-                'expanded' => true, // affiche sous forme de cases à cocher
+                'expanded' => true,
                 'multiple' => true,
                 'required' => true,
             ]);
