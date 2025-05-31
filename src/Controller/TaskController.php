@@ -13,14 +13,26 @@ use Symfony\Component\Routing\Attribute\Route;
 final class TaskController extends AbstractController
 {
     #[Route('/tasks', name: 'task_list', methods: ['GET'])]
-    public function listAction(EntityManagerInterface $entityManager): Response
-    {
-        $tasks = $entityManager->getRepository(Task::class)->findAll();
+public function listAction(EntityManagerInterface $entityManager): Response
+{
+    $tasks = $entityManager->getRepository(Task::class)->findBy(['isDone' => false]);
 
-        return $this->render('task/list.html.twig', [
-            'tasks' => $tasks,
-        ]);
-    }
+    return $this->render('task/list.html.twig', [
+        'tasks' => $tasks,
+        'show_done_only' => false,
+    ]);
+}
+
+#[Route('/tasks/done', name: 'task_list_done', methods: ['GET'])]
+public function listDoneTasks(EntityManagerInterface $entityManager): Response
+{
+    $tasks = $entityManager->getRepository(Task::class)->findBy(['isDone' => true]);
+
+    return $this->render('task/list.html.twig', [
+        'tasks' => $tasks,
+        'show_done_only' => true,
+    ]);
+}
 
     #[Route('/tasks/create', name: 'task_create', methods: ['GET', 'POST'])]
     public function createAction(Request $request, EntityManagerInterface $entityManager): Response
@@ -70,7 +82,7 @@ final class TaskController extends AbstractController
         $task->toggle(!$task->isDone());
         $entityManager->flush();
 
-        $this->addFlash('success', sprintf('La tâche a bien été marquée comme faite.'));
+        $this->addFlash('success', 'La tâche a bien été mise à jour.');
 
         return $this->redirectToRoute('task_list');
     }

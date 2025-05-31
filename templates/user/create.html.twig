@@ -1,14 +1,58 @@
 {% extends 'base.html.twig' %}
 
-{% block header_title %}<h1>Créer un utilisateur</h1>{% endblock %}
-{% block header_img %}{% endblock %}
+{% block header_title %}
+    <h1>Créer un utilisateur</h1>
+{% endblock %}
+
+{% block header_img %}
+{% endblock %}
 
 {% block body %}
-    <div class="row">
-        {{ form_start(form, {'action' : path('user_create')}) }}
-            {{ form_widget(form) }}
+    <div class="container mt-4">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
 
-            <button type="submit" class="btn btn-success pull-right">Ajouter</button>
-        {{ form_end(form) }}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                {{ form_start(form, {'action': path('user_create')}) }}
+
+                    <div class="mb-3">
+                        {{ form_label(form.username) }}
+                        {{ form_widget(form.username, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.username) }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.email) }}
+                        {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.email) }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.password.first) }}
+                        {{ form_widget(form.password.first, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.password.first) }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.password.second) }}
+                        {{ form_widget(form.password.second, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.password.second) }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.roles) }}
+                        {{ form_widget(form.roles) }}
+                        {{ form_errors(form.roles) }}
+                    </div>
+
+                    <button type="submit" class="btn btn-success">Ajouter</button>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
     </div>
 {% endblock %}
