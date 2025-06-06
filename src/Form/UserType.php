@@ -35,7 +35,7 @@ class UserType extends AbstractType
                     'attr' => ['autocomplete' => 'new-password'],
                 ],
             ])
-            ->add('mail', EmailType::class, [  // <-- ici aussi
+            ->add('mail', EmailType::class, [  
                 'label' => 'Adresse mail',
                 'required' => true,
                 'attr' => ['autocomplete' => 'email'],
@@ -47,7 +47,7 @@ class UserType extends AbstractType
                     'Utilisateur' => 'ROLE_USER',
                 ],
                 'expanded' => true,
-                'multiple' => true,
+                'multiple' => true, 
                 'required' => true,
             ]);
     }
