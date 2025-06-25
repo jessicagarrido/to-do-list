@@ -34,27 +34,30 @@ public function listDoneTasks(EntityManagerInterface $entityManager): Response
     ]);
 }
 
-    #[Route('/tasks/create', name: 'task_create', methods: ['GET', 'POST'])]
-    public function createAction(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $task = new Task();
-        $form = $this->createForm(TaskType::class, $task);
+#[Route('/tasks/create', name: 'task_create', methods: ['GET', 'POST'])]
+public function createAction(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $task = new Task();
+    $form = $this->createForm(TaskType::class, $task);
 
-        $form->handleRequest($request);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($task);
-            $entityManager->flush();
+    if ($form->isSubmitted() && $form->isValid()) {
+        $user = $this->getUser(); 
+        $task->setUser($user);    
 
-            $this->addFlash('success', 'La tâche a bien été ajoutée.');
+        $entityManager->persist($task);
+        $entityManager->flush();
 
-            return $this->redirectToRoute('task_list');
-        }
+        $this->addFlash('success', 'La tâche a bien été ajoutée.');
 
-        return $this->render('task/create.html.twig', [
-            'form' => $form->createView(),
-        ]);
+        return $this->redirectToRoute('task_list');
     }
+
+    return $this->render('task/create.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
 
     #[Route('/tasks/{id}/edit', name: 'task_edit', methods: ['GET', 'POST'])]
     public function editAction(Task $task, Request $request, EntityManagerInterface $entityManager): Response
