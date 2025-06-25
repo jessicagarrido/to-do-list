@@ -80,11 +80,4 @@ final class UserController extends AbstractController
         ]);
     }
 
-    #[Route("/users/{id}", name: "user_show", methods: ['GET'])]
-    public function showAction(User $user): Response
-    {
-        return $this->render('user/show.html.twig', [
-            'user' => $user,
-        ]);
-    }
 }
