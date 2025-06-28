@@ -37,12 +37,11 @@ final class TaskControllerTest extends WebTestCase
 // }
 
 
-//     public function testTaskListIsAccessible(): void
-//     {
-//         $this->client->request('GET', '/tasks');
-//         $this->assertResponseIsSuccessful();
-//         $this->assertSelectorExists('.glyphicon');
-//     }
+    // public function testTaskListIsAccessible(): void
+    // {
+    //     $this->client->request('GET', '/tasks');
+    //     $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+    //     $this->assertSelectorTextContains('button', 'Créer un utilisateur');    }
 
 //     public function testCreateTaskFormIsAccessible(): void
 //     {
