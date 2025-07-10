@@ -6,109 +6,119 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repository\UserRepository;
 use App\Repository\TaskRepository;
-use App\DataFixtures\AppFixtures;
-use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
+use Doctrine\ORM\EntityManagerInterface;
 
 final class TaskControllerTest extends WebTestCase
 {
-//     protected $databaseTool;
-//     private $client;
-//     private $user;
-//     private $container;
-//     private $taskRepository;
+    private $client;
+    private $user;
+    private $entityManager;
 
-//    protected function setUp(): void
-// {
-//     parent::setUp();
-//     $this->client = static::createClient();
-//     $this->container = static::getContainer();
+    protected function setUp(): void
+    {
+        $this->client = static::createClient();
+        $container = static::getContainer();
 
-//     $this->databaseTool = $this->container->get(DatabaseToolCollection::class)->get();
-//     $this->databaseTool->loadFixtures([AppFixtures::class]);
+        $userRepository = $container->get(UserRepository::class);
+        $this->user = $userRepository->findOneBy([]); 
+
+        $this->entityManager = $container->get(EntityManagerInterface::class);
+    }
+
+    private function loginUser(): void
+    {
+        $this->client->loginUser($this->user);
+    }
+
+    public function testTaskList(): void
+    {
+        $this->loginUser();
+        $this->client->request('GET', '/tasks');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('a.btn.btn-info', 'Créer une tâche');
+
+    }
+
+public function testTaskListDone(): void
+{
+    $this->loginUser();
+    $this->client->request('GET', '/tasks/done');
+    $this->assertResponseIsSuccessful();
+
+    $this->assertSelectorExists('.thumbnail');
+    $this->assertSelectorTextContains('a.btn.btn-warning', 'Voir les tâches à faire');
+}
 
 
+    public function testCreateTask(): void
+    {
+        $this->loginUser();
+        $crawler = $this->client->request('GET', '/tasks/create');
 
-//     // Récupérer utilisateur et repository
-//     $this->user = $this->container->get(UserRepository::class)->findOneBy(['username' => 'username_1']);
-//     $this->assertNotNull($this->user);
-//     $this->taskRepository = $this->container->get(TaskRepository::class);
+        $this->assertResponseIsSuccessful();
 
-//     $this->client->loginUser($this->user);
-// }
+        $form = $crawler->selectButton('Ajouter')->form([
+            'task[title]' => 'Tâche de test',
+            'task[content]' => 'Contenu de test',
+        ]);
 
+        $this->client->submit($form);
+        $this->client->followRedirect();
 
-    // public function testTaskListIsAccessible(): void
-    // {
-    //     $this->client->request('GET', '/tasks');
-    //     $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-    //     $this->assertSelectorTextContains('button', 'Créer un utilisateur');    }
+        $this->assertSelectorTextContains('.alert-success', 'La tâche a bien été ajoutée.');
+    }
 
-//     public function testCreateTaskFormIsAccessible(): void
-//     {
-//         $this->client->request('GET', '/tasks/create');
-//         $this->assertResponseIsSuccessful();
-//         $this->assertSelectorExists('form');
-//     }
+    public function testEditTask(): void
+    {
+        $this->loginUser();
+        $taskRepository = static::getContainer()->get(TaskRepository::class);
+        $task = $taskRepository->findOneBy(['user' => $this->user]);
 
-//     public function testSubmitNewTask(): void
-//     {
-//         $crawler = $this->client->request('GET', '/tasks/create');
+        $crawler = $this->client->request('GET', '/tasks/' . $task->getId() . '/edit');
 
-//         $form = $crawler->selectButton('Ajouter')->form([
-//             'task[title]' => 'Test Task',
-//             'task[content]' => 'Description de test',
-//         ]);
+        $this->assertResponseIsSuccessful();
 
-//         $this->client->submit($form);
+        $form = $crawler->selectButton('Modifier')->form([
+            'task[title]' => 'Titre modifié',
+            'task[content]' => 'Contenu modifié',
+        ]);
 
-//         $this->assertResponseRedirects('/tasks');
-//         $this->client->followRedirect();
-//         $this->assertResponseIsSuccessful();
-//         $this->assertSelectorTextContains('html', 'Test Task');
-//     }
+        $this->client->submit($form);
+        $this->client->followRedirect();
 
-//     public function testEditTask(): void
-//     {
-//         $task = $this->taskRepository->findOneBy(['user' => $this->user]);
-//         $this->assertNotNull($task);
+        $this->assertSelectorTextContains('.alert-success', 'La tâche a bien été modifiée.');
+    }
 
-//         $crawler = $this->client->request('GET', '/tasks/' . $task->getId() . '/edit');
+    public function testToggleTask(): void
+    {
+        $this->loginUser();
+        $taskRepository = static::getContainer()->get(TaskRepository::class);
+        $task = $taskRepository->findOneBy(['user' => $this->user]);
 
-//         $form = $crawler->selectButton('Modifier')->form([
-//             'task[title]' => 'Tâche modifiée',
-//         ]);
+        $this->client->request('GET', '/tasks/' . $task->getId() . '/toggle');
+        $this->client->followRedirect();
 
-//         $this->client->submit($form);
+        $this->assertSelectorTextContains('.alert-success', 'La tâche a bien été mise à jour.');
+    }
 
-//         $this->assertResponseRedirects('/tasks');
-//         $this->client->followRedirect();
-//         $this->assertSelectorTextContains('html', 'Tâche modifiée');
-//     }
+    public function testDeleteTask(): void
+    {
+        $this->loginUser();
+        $task = new \App\Entity\Task();
+        $task->setTitle('Tâche à supprimer');
+        $task->setContent('Contenu');
+        $task->setUser($this->user);
+        $task->setIsDone(false);
 
-//     public function testToggleTaskDone(): void
-//     {
-//         $task = $this->taskRepository->findOneBy(['user' => $this->user]);
-//         $this->assertNotNull($task);
+        $this->entityManager->persist($task);
+        $this->entityManager->flush();
 
-//         $this->client->request('GET', '/tasks/' . $task->getId() . '/toggle');
-//         $this->client->followRedirect();
+        $id = $task->getId();
 
-//         $this->assertResponseIsSuccessful();
-//         $this->assertSelectorTextContains('html', 'La tâche a bien été marquée comme faite.');
-//     }
+        $this->client->request('GET', '/tasks/' . $id . '/delete');
+        $this->client->followRedirect();
 
-//     public function testDeleteTask(): void
-//     {
-//         $task = $this->taskRepository->findOneBy(['user' => $this->user]);
-//         $this->assertNotNull($task);
-
-//         $this->client->request('GET', '/tasks/' . $task->getId() . '/delete');
-//         $this->client->followRedirect();
-
-//         $this->assertResponseIsSuccessful();
-//         $this->assertSelectorTextContains('html', 'La tâche a bien été supprimée.');
-
-//         $deletedTask = $this->taskRepository->find($task->getId());
-//         $this->assertNull($deletedTask);
-//     }
+        $this->assertSelectorTextContains('.alert-success', 'La tâche a bien été supprimée.');
+    }
 }
