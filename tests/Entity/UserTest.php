@@ -81,7 +81,7 @@ class UserTest extends TestCase
     public function testEraseCredentials(): void
     {
         $user = new User();
-        $this->assertNull($user->eraseCredentials()); // Ne fait rien, mais doit exister
+        $this->assertNull($user->eraseCredentials()); 
         $this->assertTrue(method_exists($user, 'eraseCredentials'));
     }
 }
