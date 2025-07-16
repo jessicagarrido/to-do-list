@@ -78,4 +78,10 @@ class UserTest extends TestCase
     $this->assertFalse($user->getTasks()->contains($task));
 }
 
-
+    public function testEraseCredentials(): void
+    {
+        $user = new User();
+        $this->assertNull($user->eraseCredentials()); 
+        $this->assertTrue(method_exists($user, 'eraseCredentials'));
+    }
+}
