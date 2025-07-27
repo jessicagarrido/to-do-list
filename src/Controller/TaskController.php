@@ -85,7 +85,7 @@ public function createAction(Request $request, EntityManagerInterface $entityMan
         $task->toggle(!$task->isDone());
         $entityManager->flush();
 
-        $this->addFlash('success', 'La tâche a bien été mise à jour.');
+        $this->addFlash('success', 'La tâche est bien terminée.');
 
         return $this->redirectToRoute('task_list');
     }
@@ -93,11 +93,22 @@ public function createAction(Request $request, EntityManagerInterface $entityMan
     #[Route('/tasks/{id}/delete', name: 'task_delete', methods: ['GET', 'DELETE'])]
     public function deleteTaskAction(Task $task, EntityManagerInterface $entityManager): Response
     {
-        $entityManager->remove($task);
-        $entityManager->flush();
+         $user = $this->getUser();
+         $userRole = $user->getRoles();
 
-        $this->addFlash('success', 'La tâche a bien été supprimée.');
+        if ($task->getUser() == $this->getUser() || $task->getUser() === null && $userRole[0] == "ROLE_ADMIN") {
+            $entityManager->remove($task);
+            $entityManager->flush();
 
-        return $this->redirectToRoute('task_list');
+            $this->addFlash('success', 'La tâche a bien été supprimée.');
+
+            if($task->isDone() === true) {
+                    return $this->redirectToRoute('task_list_done');
+                }
+            return $this->redirectToRoute('task_list');
+        } else {
+            throw $this->createAccessDeniedException(); 
+        }
+            
     }
 }

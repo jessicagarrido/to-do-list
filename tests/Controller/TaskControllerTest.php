@@ -99,7 +99,7 @@ public function testTaskListDone(): void
         $this->client->request('GET', '/tasks/' . $task->getId() . '/toggle');
         $this->client->followRedirect();
 
-        $this->assertSelectorTextContains('.alert-success', 'La tâche a bien été mise à jour.');
+        $this->assertSelectorTextContains('.alert-success', 'La tâche est bien terminée.');
     }
 
     public function testDeleteTask(): void
